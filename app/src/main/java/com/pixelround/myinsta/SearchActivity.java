@@ -6,13 +6,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -31,14 +35,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     private FirebaseDatabase mDatabase;
 
-    private EditText mSearchField;
+//    private EditText mSearchField;
     private RecyclerView searchResultsView;
 
     private CollectionReference mCompaniesDatabase;
@@ -53,45 +58,56 @@ public class SearchActivity extends AppCompatActivity {
         mCompaniesDatabase = FirebaseFirestore.getInstance().collection("companies");
 
         // Views
-        mSearchField = (EditText) findViewById(R.id.search_text);
-        mSearchField.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        mSearchField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    firebaseCompanySearch(v.getText().toString());
-                    return true;
-            }
-        });
+//        mSearchField = (EditText) findViewById(R.id.search_text);
+//        mSearchField.setImeOptions(EditorInfo.IME_ACTION_DONE);
+//        mSearchField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+//            @Override
+//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+//                    firebaseCompanySearch(v.getText().toString());
+//                    return true;
+//            }
+//        });
 
         searchResultsView = (RecyclerView) findViewById(R.id.search_results);
         searchResultsView.setHasFixedSize(true);
         searchResultsView.setLayoutManager(new LinearLayoutManager(this));
 
+        firebaseCompanySearch("");
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        MenuItem menuItem = menu.findItem(R.id.search_button);
+        SearchView searchView = (SearchView) menuItem.getActionView();
+        searchView.setOnQueryTextListener(this);
+        return true;
     }
 
     private FirestoreRecyclerAdapter<Companies, CompaniesViewHolder> firebaseRecyclerAdapter;
 
 
     private void firebaseCompanySearch(String searchQuery) {
-        Query query = mCompaniesDatabase.whereEqualTo("name", searchQuery);
-        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot snapshot,
-                                @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    // Handle error
-                    //...
-                    return;
-                }
+        Query query = mCompaniesDatabase.orderBy("name").startAt(searchQuery).endAt(searchQuery+"\uf8ff");
 
-                // Convert query snapshot to a list of chats
-                List<Companies> chats = snapshot.toObjects(Companies.class);
-                System.out.println(chats);
-
-                // Update UI
-                // ...
-            }
-        });
+//        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+//            @Override
+//            public void onEvent(@Nullable QuerySnapshot snapshot,
+//                                @Nullable FirebaseFirestoreException e) {
+//                if (e != null) {
+//                    // Handle error
+//                    //...
+//                    return;
+//                }
+//
+//                // Convert query snapshot to a list of chats
+//                List<Companies> chats = snapshot.toObjects(Companies.class);
+//                System.out.println(chats);
+//
+//                // Update UI
+//                // ...
+//            }
+//        });
 
         FirestoreRecyclerOptions<Companies> firebaseRecyclerOptions = new FirestoreRecyclerOptions.Builder<Companies>().setQuery(query, Companies.class).build();
 
@@ -99,7 +115,7 @@ public class SearchActivity extends AppCompatActivity {
         firebaseRecyclerAdapter = new FirestoreRecyclerAdapter<Companies, CompaniesViewHolder>(firebaseRecyclerOptions) {
             @Override
             protected void onBindViewHolder(@NonNull CompaniesViewHolder holder, int position, @NonNull Companies model) {
-                holder.setDetails(model.getName(), model.getFriendlinessScore(), model.getEqualityScore(), model.getFamilyScore());
+                holder.setDetails(model);
             }
 
             @NonNull
@@ -115,6 +131,17 @@ public class SearchActivity extends AppCompatActivity {
         firebaseRecyclerAdapter.startListening();
     }
 
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        firebaseCompanySearch(newText);
+        return false;
+    }
+
     // Company data holder view
 
     public static class CompaniesViewHolder extends RecyclerView.ViewHolder {
@@ -126,16 +153,21 @@ public class SearchActivity extends AppCompatActivity {
             mView = itemView;
         }
 
-        public void setDetails(String companyName, Double friendlinessScore, Double equalityScore, Double familyScore) {
+        public void setDetails(Companies company) {
             TextView companyNameTextView = (TextView) mView.findViewById(R.id.company_name);
             TextView friendlinessScoreTextView = (TextView) mView.findViewById(R.id.friendliness_score);
             TextView equalityScoreTextView = (TextView) mView.findViewById(R.id.equality_score);
             TextView familyScoreTextView = (TextView) mView.findViewById(R.id.family_score);
+            ImageView logoImageView = (ImageView) mView.findViewById(R.id.logo_image);
 
-            companyNameTextView.setText(companyName);
-            friendlinessScoreTextView.setText(String.format("%.2f%%", friendlinessScore));
-            equalityScoreTextView.setText(String.format("%.2f%%", equalityScore));
-            familyScoreTextView.setText(String.format("%.2f%%", familyScore));
+            companyNameTextView.setText(company.getName());
+            friendlinessScoreTextView.setText(String.format("%.0f%%", company.getFriendlinessScore()));
+            equalityScoreTextView.setText(String.format("%.0f%%", company.getEqualityScore()));
+            familyScoreTextView.setText(String.format("%.0f%%", company.getFamilyScore()));
+
+            if (company.getLogo() != null && company.getLogo().trim().length() > 0) {
+                Picasso.get().load(company.getLogo()).into(logoImageView);
+            }
         }
     }
 }
