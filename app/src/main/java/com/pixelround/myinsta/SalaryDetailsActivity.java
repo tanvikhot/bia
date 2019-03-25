@@ -2,13 +2,19 @@ package com.pixelround.myinsta;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.widget.TextView;
 
+import com.google.firebase.firestore.CollectionReference;
 import com.google.gson.Gson;
 
 import java.text.DecimalFormat;
 
 public class SalaryDetailsActivity extends AppCompatActivity {
+
+    private RecyclerView searchResultsView;
+
+    private CollectionReference mCompaniesDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

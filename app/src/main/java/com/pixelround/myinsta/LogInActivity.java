@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +27,7 @@ public class LogInActivity extends AppCompatActivity {
     private EditText passwordLogIn;
     private Button logInButton;
     private TextView signUpLink;
+    private ImageView logo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,10 +35,13 @@ public class LogInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_log_in);
         mAuth = FirebaseAuth.getInstance();
 
+        logo = findViewById(R.id.logoLogIn);
         emailLogIn = findViewById(R.id.emailLogIn);
         passwordLogIn = findViewById(R.id.passwordLogIn);
         logInButton = findViewById(R.id.logInButton);
         signUpLink = findViewById(R.id.signUpLink);
+
+        logo.setImageResource(R.drawable.bialogo);
 
         logInButton.setOnClickListener(new View.OnClickListener() {
 
