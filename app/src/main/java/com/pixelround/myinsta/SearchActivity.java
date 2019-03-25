@@ -1,5 +1,6 @@
 package com.pixelround.myinsta;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -37,11 +38,11 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.squareup.picasso.Picasso;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SearchActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
-
-    private FirebaseDatabase mDatabase;
 
 //    private EditText mSearchField;
     private RecyclerView searchResultsView;
@@ -58,21 +59,14 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         mCompaniesDatabase = FirebaseFirestore.getInstance().collection("companies");
 
         // Views
-//        mSearchField = (EditText) findViewById(R.id.search_text);
-//        mSearchField.setImeOptions(EditorInfo.IME_ACTION_DONE);
-//        mSearchField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-//                    firebaseCompanySearch(v.getText().toString());
-//                    return true;
-//            }
-//        });
 
         searchResultsView = (RecyclerView) findViewById(R.id.search_results);
         searchResultsView.setHasFixedSize(true);
         searchResultsView.setLayoutManager(new LinearLayoutManager(this));
 
         firebaseCompanySearch("");
+
+        setTitle("Companies");
     }
 
     @Override
@@ -86,28 +80,8 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
 
     private FirestoreRecyclerAdapter<Companies, CompaniesViewHolder> firebaseRecyclerAdapter;
 
-
     private void firebaseCompanySearch(String searchQuery) {
         Query query = mCompaniesDatabase.orderBy("name").startAt(searchQuery).endAt(searchQuery+"\uf8ff");
-
-//        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
-//            @Override
-//            public void onEvent(@Nullable QuerySnapshot snapshot,
-//                                @Nullable FirebaseFirestoreException e) {
-//                if (e != null) {
-//                    // Handle error
-//                    //...
-//                    return;
-//                }
-//
-//                // Convert query snapshot to a list of chats
-//                List<Companies> chats = snapshot.toObjects(Companies.class);
-//                System.out.println(chats);
-//
-//                // Update UI
-//                // ...
-//            }
-//        });
 
         FirestoreRecyclerOptions<Companies> firebaseRecyclerOptions = new FirestoreRecyclerOptions.Builder<Companies>().setQuery(query, Companies.class).build();
 
@@ -123,6 +97,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
             public CompaniesViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
                 View view = LayoutInflater.from(viewGroup.getContext())
                         .inflate(R.layout.list_layout, viewGroup, false);
+                view.setOnClickListener(mOnClickListener);
                 return new CompaniesViewHolder(view);
             }
         };
@@ -154,6 +129,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         }
 
         public void setDetails(Companies company) {
+            mView.setTag(company.getName());
             TextView companyNameTextView = (TextView) mView.findViewById(R.id.company_name);
             TextView friendlinessScoreTextView = (TextView) mView.findViewById(R.id.friendliness_score);
             TextView equalityScoreTextView = (TextView) mView.findViewById(R.id.equality_score);
@@ -168,6 +144,21 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
             if (company.getLogo() != null && company.getLogo().trim().length() > 0) {
                 Picasso.get().load(company.getLogo()).into(logoImageView);
             }
+        }
+    }
+
+    private final View.OnClickListener mOnClickListener = new MyOnClickListener();
+
+    public class MyOnClickListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            Bundle bundle = new Bundle();
+            bundle.putString("name", (String) v.getTag());
+            System.out.println(v.getTag());
+            Intent jobTitlesIntent = new Intent(SearchActivity.this, JobTitlesActivity.class);
+            jobTitlesIntent.putExtras(bundle);
+            startActivity(jobTitlesIntent);
         }
     }
 }
