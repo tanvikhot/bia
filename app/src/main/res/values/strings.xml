@@ -6,4 +6,12 @@
     <string name="equality_score">Equality Score</string>
     <string name="salary_range_women">Salary Range for Women</string>
     <string name="salary_range_for_men">Salary Range for Men</string>
+    <string-array name="education_array">
+        <item>Not Completed High School</item>
+        <item>High School</item>
+        <item>Associate\'s Degree</item>
+        <item>Bachelor\'s Degree</item>
+        <item>Master\'s Degree</item>
+        <item>Doctorate Degree</item>
+    </string-array>
 </resources>

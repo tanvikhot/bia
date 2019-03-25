@@ -1,4 +1,4 @@
-package com.pixelround.myinsta;
+/*package com.pixelround.myinsta;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -27,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
     }
@@ -82,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     public void signIn(View view) {
         EditText emailText = findViewById(R.id.email);
         EditText passwordText = findViewById(R.id.password);
@@ -111,3 +111,4 @@ public class MainActivity extends AppCompatActivity {
         startActivity(new Intent(MainActivity.this, SearchActivity.class));
     }
 }
+*/
