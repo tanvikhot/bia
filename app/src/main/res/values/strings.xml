@@ -3,4 +3,5 @@
     <string name="login">Login</string>
     <string name="signup">Sign Up</string>
     <string name="search_hint">Enter company name</string>
+    <string name="equality_score">Equality Score</string>
 </resources>
